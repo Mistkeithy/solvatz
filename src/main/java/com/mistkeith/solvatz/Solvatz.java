@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class SolvatzApplication {
+public class Solvatz {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SolvatzApplication.class, args);
+		SpringApplication.run(Solvatz.class, args);
 	}
 
 }
