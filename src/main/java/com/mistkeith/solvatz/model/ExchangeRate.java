@@ -8,6 +8,7 @@ import javax.persistence.Id;
 
 @Entity
 public class ExchangeRate {
+
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -18,6 +19,7 @@ public class ExchangeRate {
     @Column(name = "rate")
     private Double rate;
 
+    // Default constructor
     public ExchangeRate() {
     }
 

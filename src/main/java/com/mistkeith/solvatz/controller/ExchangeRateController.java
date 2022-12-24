@@ -15,13 +15,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mistkeith.solvatz.model.ExchangeRate;
-import com.mistkeith.solvatz.repository.ExchangeRateRepository;
+import com.mistkeith.solvatz.repository.IExchangeRateRepository;
 
 @RestController
 public class ExchangeRateController {
 
     @Autowired
-    private ExchangeRateRepository exchangeRateRepository;
+    private IExchangeRateRepository exchangeRateRepository;
 
     @GetMapping("/exchange-rates")
     public Iterable<ExchangeRate> getExchangeRates() {
@@ -35,7 +35,7 @@ public class ExchangeRateController {
         // the specified currency
         String apiKey = "96PFC2ULHIGBJQA5";
         String url = "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=" + currency
-                + "&to_currency=KZT&apikey=" + apiKey;
+                + "&to_currency=USD&apikey=" + apiKey;
         String jsonResponse = sendRequest(url);
 
         // Parse the response to get the exchange rate

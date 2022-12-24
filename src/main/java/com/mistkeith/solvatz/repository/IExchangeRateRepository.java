@@ -1,10 +1,11 @@
 package com.mistkeith.solvatz.repository;
 
-import com.mistkeith.solvatz.model.ExchangeRate;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import com.mistkeith.solvatz.model.ExchangeRate;
+
 @Repository
-public interface ExchangeRateRepository extends JpaRepository<ExchangeRate, Long> {
+public interface IExchangeRateRepository extends JpaRepository<ExchangeRate, Long> {
 
 }
