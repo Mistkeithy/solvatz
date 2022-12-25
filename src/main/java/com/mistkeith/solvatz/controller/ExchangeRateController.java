@@ -10,7 +10,6 @@ import java.net.URL;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -29,17 +28,25 @@ public class ExchangeRateController {
         return exchangeRateRepository.findAll();
     }
 
-    @PostMapping("/exchange-rates")
     public void addExchangeRate(@RequestParam String currency) {
         // Make a request to the Alpha Vantage API to get the current exchange rate for
         // the specified currency
         String apiKey = "96PFC2ULHIGBJQA5";
         String url = "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=" + currency
-                + "&to_currency=USD&apikey=" + apiKey;
+                + "&to_currency=USD&apikey=" + apiKey + "&interval=1day";
         String jsonResponse = sendRequest(url);
 
         // Parse the response to get the exchange rate
         double exchangeRate = parseResponse(jsonResponse);
+
+        // If the exchange rate is not available for the current day, use the previous
+        // close
+        if (exchangeRate == 0) {
+            url = "https://www.alphavantage.co/query?function=FX_DAILY_ADJUSTED&from_symbol=" + currency
+                    + "&to_symbol=USD&apikey=" + apiKey;
+            jsonResponse = sendRequest(url);
+            exchangeRate = parseDailyResponse(jsonResponse);
+        }
 
         // Save the exchange rate to the database
         ExchangeRate rate = new ExchangeRate(currency, exchangeRate);
@@ -70,10 +77,31 @@ public class ExchangeRateController {
         return jsonResponse;
     }
 
-    private double parseResponse(String jsonResponse) throws JSONException {
+    private double parseResponse(String jsonResponse) {
+        try {
+            JSONObject json = new JSONObject(jsonResponse);
+            JSONObject rateObject = json.getJSONObject("Realtime Currency Exchange Rate");
+            return rateObject.getDouble("close");
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    private double parseDailyResponse(String jsonResponse) throws JSONException {
         JSONObject jsonObject = new JSONObject(jsonResponse);
-        JSONObject ratesObject = jsonObject.getJSONObject("rates");
-        double exchangeRate = ratesObject.getDouble("KZT");
+        JSONObject dailyData = jsonObject.getJSONObject("Time Series FX (Daily)");
+        String[] dates = dailyData.keySet().toArray(new String[0]);
+        // Find the most recent date for which data is available
+        String mostRecentDate = "";
+        for (String date : dates) {
+            if (date.compareTo(mostRecentDate) > 0) {
+                mostRecentDate = date;
+            }
+        }
+        // Use the close value for the most recent date as the exchange rate
+        JSONObject dateData = dailyData.getJSONObject(mostRecentDate);
+        double exchangeRate = dateData.getDouble("4. close");
         return exchangeRate;
     }
 
