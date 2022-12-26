@@ -28,6 +28,7 @@ public class ExchangeRateController {
         return exchangeRateRepository.findAll();
     }
 
+    @GetMapping("/exchange-rate")
     public void addExchangeRate(@RequestParam String currency) {
         // Make a request to the Alpha Vantage API to get the current exchange rate for
         // the specified currency
@@ -67,6 +68,8 @@ public class ExchangeRateController {
                 StringBuilder response = new StringBuilder();
                 while ((inputLine = in.readLine()) != null) {
                     response.append(inputLine);
+                    // отладка
+                    System.out.println(inputLine);
                 }
                 in.close();
                 jsonResponse = response.toString();
@@ -81,7 +84,7 @@ public class ExchangeRateController {
         try {
             JSONObject json = new JSONObject(jsonResponse);
             JSONObject rateObject = json.getJSONObject("Realtime Currency Exchange Rate");
-            return rateObject.getDouble("close");
+            return rateObject.getDouble("5. Exchange Rate");
         } catch (JSONException e) {
             e.printStackTrace();
         }
