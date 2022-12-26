@@ -12,14 +12,16 @@ public class ExchangeRate {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String currency;
+    private String date;
     private Double rate;
 
     // Default constructor
     public ExchangeRate() {
     }
 
-    public ExchangeRate(String currency, Double rate) {
+    public ExchangeRate(String currency, Double rate, String date) {
         this.currency = currency;
+        this.date = date;
         this.rate = rate;
     }
 
@@ -33,6 +35,14 @@ public class ExchangeRate {
 
     public void setCurrency(String currency) {
         this.currency = currency;
+    }
+
+    public String getDate() {
+        return date;
+    }
+
+    public void setDate(String date) {
+        this.date = date;
     }
 
     public Double getRate() {
