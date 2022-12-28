@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.text.SimpleDateFormat;
 
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mistkeith.solvatz.model.Expense;
 import com.mistkeith.solvatz.repository.IExpenseRepository;
+import com.mistkeith.solvatz.util.ExpenseFilter;
 
 @RestController
 public class ExpenseController {
@@ -36,17 +39,25 @@ public class ExpenseController {
     }
 
     @GetMapping("/expense")
-    public Iterable<Expense> getExpenses() {
+    public ResponseEntity<Iterable<Expense>> getExpenses(String currency, String category) {
+
+        // load all expenses to Expense Filter
+        ExpenseFilter expenseFilter = new ExpenseFilter(this.expenseRepository.findAll());
+
+        // filter by params
+        expenseFilter.search(currency);
+        expenseFilter.search(category);
+
         // return all data from db in json
-        return expenseRepository.findAll();
+        return ResponseEntity.status(HttpStatus.FOUND).body(expenseFilter.getExpenses());
     }
 
     @PostMapping("/expense")
-    public ResponseEntity<Expense> newExpense(double amount, String currency, String date, String description,
+    public ResponseEntity<Expense> newExpense(Double amount, String currency, String date, String description,
             String category) {
 
         // request is empty
-        if (Double.isNaN(amount) && currency == null && date == null && category == null)
+        if (amount == null && currency == null && date == null && category == null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
 
         try {
