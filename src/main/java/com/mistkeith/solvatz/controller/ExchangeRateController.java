@@ -11,7 +11,10 @@ import java.util.Date;
 import java.text.SimpleDateFormat;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -24,14 +27,18 @@ public class ExchangeRateController {
     @Autowired
     private IExchangeRateRepository exchangeRateRepository;
 
-    @GetMapping("/exchange-rates")
+    public ExchangeRateController(IExchangeRateRepository exchangeRateRepository) {
+        this.exchangeRateRepository = exchangeRateRepository;
+    }
+
+    @GetMapping("/exchange-rate")
     public Iterable<ExchangeRate> getExchangeRates() {
         // return all data from db in json
         return exchangeRateRepository.findAll();
     }
 
-    @GetMapping("/exchange-rate")
-    public ExchangeRate addExchangeRate(@RequestParam String currency) {
+    @PostMapping("/exchange-rate")
+    public ResponseEntity<ExchangeRate> addExchangeRate(@RequestParam String currency) {
         // Set api key and use the url. Get json string.
         String apiKey = "96PFC2ULHIGBJQA5";
         String url = "https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency=" + currency
@@ -56,10 +63,10 @@ public class ExchangeRateController {
         String formattedDate = formatter.format(currentDate);
 
         // save this exchange rate to db
-        ExchangeRate rateObject = new ExchangeRate(currency, exchangeRate, formattedDate);
-        exchangeRateRepository.save(rateObject);
+        ExchangeRate exchRate = new ExchangeRate(currency, exchangeRate, formattedDate);
+        exchangeRateRepository.save(exchRate);
 
-        return rateObject;
+        return ResponseEntity.status(HttpStatus.CREATED).body(exchRate);
     }
 
     private String sendRequest(String urlString) {
